@@ -11,7 +11,7 @@ string readFromFile(string filename)
     ifstream dataFile(filename);
 
     cout << "\nReading -> " << filename.substr(5, 10) << '\n'
-         << endl;
+        << endl;
 
     if (dataFile.is_open())
     {
@@ -134,7 +134,7 @@ void printFormated(int disciplinas, int dias, int salas, int horarios, vector<ve
     cout << "horario: " << horarios << endl;
 
     cout << "\nMAT (disciplina x salas): \n"
-         << endl;
+        << endl;
     for (int i = 0; i < disciplinas; i++)
     {
         for (int j = 0; j < salas; j++)
@@ -145,7 +145,7 @@ void printFormated(int disciplinas, int dias, int salas, int horarios, vector<ve
     }
 
     cout << "\nMAT (disciplina x horario): \n"
-         << endl;
+        << endl;
     for (int i = 0; i < disciplinas; i++)
     {
         for (int j = 0; j < horarios; j++)
