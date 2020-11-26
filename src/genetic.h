@@ -11,7 +11,7 @@ using namespace std;
 struct chromoTuple
 {
     vector<vector<int>> chromo;
-    int conflitos;
+    double conflitos;
 };
 class Chromossome
 {
