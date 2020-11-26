@@ -144,7 +144,7 @@ void GeneticAlg::fitnessFunction(int disc, int salas, int dias, int horarios, ve
                 j++;
             }
             bool encontrou1 = false;
-            for (int p : pref_horario[aula[0]])
+            for (int p : pref_horario[aula[0] - 1])
             {
                 if (p == 1)
                 {
@@ -155,7 +155,7 @@ void GeneticAlg::fitnessFunction(int disc, int salas, int dias, int horarios, ve
 
             if (encontrou1 == true)
             {
-                if (pref_horario[aula[0]][aula[3] - 1] != 1)
+                if (pref_horario[aula[0] - 1][aula[3] - 1] != 1)
                 {
                     n_conflitos += 1;
                 }
