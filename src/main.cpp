@@ -20,8 +20,9 @@ int main()
         int gen = 0;
         chromoTuple best_chrome;
         best_chrome.conflitos = 0;
-        while (true)
+        while (1)
         {
+            gen += 1;
             cout << gen;
             alg.fitnessFunction(disc, salas, dias, horarios, disp_salas, pref_horario);
             if (alg.population[0].conflitos > best_chrome.conflitos)
