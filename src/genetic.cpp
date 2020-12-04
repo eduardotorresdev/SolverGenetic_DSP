@@ -1,26 +1,27 @@
 #include <iostream>
-#include <ctime>
-#include <vector>
-#include <algorithm>
-#include <random>
+#include <chrono>
 #include "genetic.h"
 
 using namespace std;
 
+unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+default_random_engine generator(seed);
+uniform_real_distribution<double> distribution(0.0, 1.0);
+
 void Chromossome::initializeChromossome(int disc, int salas, int dias, int horarios)
 {
-    srand((unsigned)time(0));
+    int discId = 0;
 
-    int discId = 1;
-    for (int i = 0; i < 2 * disc + 1; i++)
+    for (int i = 0; i < 2 * disc; i++)
     {
         vector<int> genes{
             discId,
-            (rand() % salas) + 1,
-            (rand() % dias) + 1,
-            (rand() % horarios) + 1};
+            rand() % salas,
+            rand() % dias,
+            rand() % horarios};
+
         chrome.push_back(genes);
-        if (i % 2 == 0)
+        if (i % 2 == 0 && i > 0)
         {
             discId += 1;
         }
@@ -32,51 +33,51 @@ void print_chrome(vector<vector<int>> chrome, int salas, int dias, int horarios)
     vector<vector<vector<int>>> escalonamento = vector<vector<vector<int>>>{
         vector<vector<vector<int>>>(salas, vector<vector<int>>(dias, vector<int>(horarios, 0)))};
 
-    for (int k = 1; k < salas + 1; k++)
+    for (int k = 0; k < salas; k++)
     {
-        for (int j = 1; j < horarios + 1; j++)
+        for (int j = 0; j < horarios; j++)
         {
-            for (int i = 1; i < dias + 1; i++)
+            for (int i = 0; i < dias; i++)
             {
                 for (vector<int> aula : chrome)
                 {
                     if (aula[2] == i && aula[3] == j && aula[1] == k)
                     {
-                        escalonamento[k - 1][i - 1][j - 1] = aula[0];
+                        escalonamento[k][i][j] = aula[0] - 1;
                     }
                 }
             }
         }
     }
 
-    for (int k = 1; k < salas + 1; k++)
+    for (int k = 0; k < salas; k++)
     {
-        cout << "SALA - " << std::to_string(k) << "\n";
+        cout << "SALA - " << std::to_string(k + 1) << "\n";
         cout << "-------------------------------------------------------"
              << "\n";
-        cout << "          ";
+        cout << "            ";
 
-        for (int i = 1; i < dias + 1; i++)
+        for (int i = 0; i < dias; i++)
         {
-            cout << "|DIA " << std::to_string(i) << "  |";
+            cout << "|DIA " << std::to_string(i + 1) << "  |";
         }
         cout << "\n";
 
-        for (int j = 1; j < horarios + 1; j++)
+        for (int j = 0; j < horarios; j++)
         {
             cout << "-------------------------------------------------------\n";
-            cout << std::to_string(j) << "º horário";
+            cout << std::to_string(j + 1) << "º horário";
 
-            for (int i = 1; i < dias + 1; i++)
+            for (int i = 0; i < dias; i++)
             {
-                string str = std::to_string(escalonamento[k - 1][i - 1][j - 1]);
+                string str = std::to_string(escalonamento[k][i][j]);
 
-                if (escalonamento[k - 1][i - 1][j - 1] == 0)
+                if (escalonamento[k][i][j] == 0)
                 {
                     str = "-";
                 }
 
-                if (str.length() > 9)
+                if (escalonamento[k][i][j] > 9)
                 {
                     cout << "|  " << str << "   |";
                 }
@@ -122,8 +123,9 @@ void GeneticAlg::fitnessFunction(int disc, int salas, int dias, int horarios, ve
         for (vector<int> aula : c.chromo)
         {
             // CHECA SE A DISCIPLINA PODE SER MINISTRADA NAQUELA SALA
-            salas_utilizadas[aula[1] - 1] += 1;
-            if (disp_sala[aula[0]][aula[1] - 1] == 0)
+            salas_utilizadas[aula[1]] += 1;
+
+            if (disp_sala[aula[0]][aula[1]] == 0)
             {
                 n_conflitos += 1;
             }
@@ -144,7 +146,7 @@ void GeneticAlg::fitnessFunction(int disc, int salas, int dias, int horarios, ve
                 j++;
             }
             bool encontrou1 = false;
-            for (int p : pref_horario[aula[0] - 1])
+            for (int p : pref_horario[aula[0]])
             {
                 if (p == 1)
                 {
@@ -155,7 +157,7 @@ void GeneticAlg::fitnessFunction(int disc, int salas, int dias, int horarios, ve
 
             if (encontrou1 == true)
             {
-                if (pref_horario[aula[0] - 1][aula[3] - 1] != 1)
+                if (pref_horario[aula[0]][aula[3]] != 1)
                 {
                     n_conflitos += 1;
                 }
@@ -195,48 +197,48 @@ void GeneticAlg::fitnessFunction(int disc, int salas, int dias, int horarios, ve
 vector<chromoTuple> GeneticAlg::slicingPopulation(vector<chromoTuple> &arr, int X, int Y)
 {
 
-    auto start = arr.begin() + X;
-    auto end = arr.begin() + Y;
+    auto first = arr.cbegin() + X;
+    auto last = arr.cbegin() + Y + 1;
 
-    vector<chromoTuple> result(Y - X);
-
-    copy(start, end, result.begin());
-
-    return result;
+    vector<chromoTuple> vec(first, last);
+    return vec;
 }
 
 vector<chromoTuple> GeneticAlg::shufflePopulation(vector<chromoTuple> &arr)
 {
-    auto rng = std::default_random_engine{};
-    std::shuffle(std::begin(arr), std::end(arr), rng);
-    return arr;
+    auto first = arr.cbegin();
+    auto last = arr.cbegin() + arr.size();
+
+    vector<chromoTuple> vec(first, last);
+
+    auto rng = default_random_engine{};
+    shuffle(begin(vec), end(vec), rng);
+    return vec;
 }
 
 vector<chromoTuple> GeneticAlg::GeneticAlg::selectChrome()
 {
     vector<chromoTuple> chromes;
 
-    srand((unsigned)time(0));
-
     int i = 0;
 
-    while (i < 0.3 * population_size)
+    while (i < (int)(0.3 * population_size))
     {
         chromes.push_back(population[rand() % population.size()]);
         i += 1;
     }
 
-    std::sort(chromes.begin(), chromes.end(), [](auto const &a, auto const &b) { return a.conflitos > b.conflitos; });
+    sort(chromes.begin(), chromes.end(), [](auto const &a, auto const &b) { return a.conflitos > b.conflitos; });
     return chromes;
 }
 
 void GeneticAlg::crossover()
 {
-    srand((unsigned)time(0));
-    vector<chromoTuple> new_population = slicingPopulation(population, 0, elite_size_group);
-    new_population = shufflePopulation(new_population);
+    vector<chromoTuple> new_population = slicingPopulation(population, 0, elite_size_group - 1);
+    vector<chromoTuple> population_shuffled = shufflePopulation(population);
+    population = population_shuffled;
 
-    int i = 0;
+    int i = new_population.size();
     while (i < population_size)
     {
         vector<vector<int>> chrome_filho;
@@ -260,19 +262,19 @@ void GeneticAlg::crossover()
             0});
         i += 1;
     }
+
+    population = new_population;
 }
 
 vector<vector<int>> GeneticAlg::mutateChrome(vector<vector<int>> chrome, int disc, int dias, int salas, int horarios)
 {
-    srand((unsigned)time(0));
-
     Chromossome c;
     c.initializeChromossome(disc, salas, dias, horarios);
 
     int i = 0;
     for (vector<int> aula : chrome)
     {
-        if (((rand() % 10 + 1) / 10) < 0.1)
+        if (distribution(generator) < 0.1)
         {
             chrome[i] = c.chrome[i];
         }
@@ -283,10 +285,11 @@ vector<vector<int>> GeneticAlg::mutateChrome(vector<vector<int>> chrome, int dis
 
 void GeneticAlg::mutation(int disc, int dias, int salas, int horarios)
 {
-    vector<chromoTuple> new_population = slicingPopulation(population, 0, elite_size_group);
-    population = slicingPopulation(population, elite_size_group, population.size());
+    vector<chromoTuple> new_population = slicingPopulation(population, 0, elite_size_group - 1);
+    vector<chromoTuple> population_no_elite = slicingPopulation(population, elite_size_group, population.size() - 1);
+    population = population_no_elite;
 
-    for (int i = elite_size_group; i < population.size(); i++)
+    for (int i = 0; i < population.size(); i++)
     {
         new_population.push_back(chromoTuple{
             mutateChrome(population[i].chromo, disc, dias, salas, horarios),

@@ -1,6 +1,10 @@
 #ifndef _H_GENETIC
 #define _H_GENETIC
 #pragma once
+#include <time.h>
+#include <vector>
+#include <algorithm>
+#include <random>
 using namespace std;
 
 /**

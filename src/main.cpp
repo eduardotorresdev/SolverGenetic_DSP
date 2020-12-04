@@ -1,4 +1,5 @@
 #include <iostream>
+#include <locale>
 #include "reader.h"
 #include "genetic.h"
 
@@ -9,6 +10,8 @@ int main()
     int disc, dias, salas, horarios;
     vector<vector<int>> disp_salas, pref_horario;
     string dataContent = readFromFile("data/10_5_5_8-1.dat");
+    setlocale(LC_ALL, "");
+    srand(time(NULL));
 
     if (dataContent != "err")
     {
@@ -17,13 +20,14 @@ int main()
 
         GeneticAlg alg;
         alg.initializePopulation(disc, salas, dias, horarios);
+        print_chrome(alg.population[0].chromo, salas, dias, horarios);
         int gen = 0;
         chromoTuple best_chrome;
         best_chrome.conflitos = 0;
         while (1)
         {
             gen += 1;
-            cout << gen;
+            cout << gen << endl;
             alg.fitnessFunction(disc, salas, dias, horarios, disp_salas, pref_horario);
             if (alg.population[0].conflitos > best_chrome.conflitos)
             {
@@ -38,7 +42,7 @@ int main()
 
             for (int i = 0; i < 5; i++)
             {
-                cout << alg.population[i].conflitos;
+                cout << alg.population[i].conflitos << endl;
             }
 
             alg.crossover();
