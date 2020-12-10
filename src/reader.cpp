@@ -81,6 +81,7 @@ tuple<int, int, int, int, vector<vector<int>>, vector<vector<int>>> middlewareTo
             else if (!negativeNumber && (dataContent[i + 1] - '0') >= 0)
             {
                 tmpNumber *= 10;
+                tmpNumber += (dataContent[i + 1] - '0');
                 allNumbers.push_back(tmpNumber);
 
                 i += 1;
